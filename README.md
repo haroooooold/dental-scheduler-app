@@ -4,7 +4,7 @@ This is a Node.js backend project for scheduling dental appointments. Built for 
 
 ## 🔗 Live API
 
-http://your-loadbalancer-url.amazonaws.com
+http://a97b7d07aa44646d8ac1345569b44e33-509261369.us-east-1.elb.amazonaws.com
 
 ## 🚀 Tech Stack
 
