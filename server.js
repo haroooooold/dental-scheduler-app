@@ -6,6 +6,14 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const cors = require("cors");
 
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
 app.use(express.json());
 
 app.get("/user-appointments", async (req, res) => {
@@ -16,40 +24,97 @@ app.get("/user-appointments", async (req, res) => {
     let params = [];
 
     if (userName) {
-      query += " WHERE full_name = ?";
+      query += " WHERE email = ?";
       params.push(userName);
     }
 
     const [rows] = await db.execute(query, params);
-    res.json(rows);
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        status: 200,
+        data: [],
+        message: "No appointments found.",
+      });
+    }
+
+    res.status(200).json({
+      status: 200,
+      data: rows,
+      message: "Appointments fetched successfully.",
+    });
   } catch (err) {
-    console.error("Error fetching user appointments:", err);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Error fetching appointments:", err);
+    res.status(500).json({
+      status: 500,
+      message: "Internal server error",
+    });
   }
 });
-
-const users = [
-  {
-    id: 1,
-    email: "admin@example.com",
-    password: bcrypt.hashSync("admin123", 8), // hashed password
-  },
-];
 
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  const user = users.find((u) => u.email === email);
-  if (!user) return res.status(401).json({ error: "Invalid credentials" });
+  if (!email || !password) {
+    return res.status(400).json({
+      status: 400,
+      data: {
+        error_message: "Email and password are required.",
+      },
+      message: "error",
+    });
+  }
 
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
+  try {
+    const [rows] = await db.execute(
+      `SELECT email, password FROM users_masterlist WHERE email = ? LIMIT 1`,
+      [email]
+    );
 
-  const token = jwt.sign({ id: user.id, email: user.email }, "secretkey", {
-    expiresIn: "1h",
-  });
+    const user = rows[0];
 
-  res.json({ token });
+    if (!user) {
+      return res.status(401).json({
+        status: 401,
+        data: {
+          error_message: "Invalid email or password.",
+        },
+        message: "error",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({
+        status: 401,
+        data: {
+          error_message: "Invalid email or password.",
+        },
+        message: "error",
+      });
+    }
+
+    const token = jwt.sign({ email: user.email }, "secretkey", {
+      expiresIn: "1h",
+    });
+
+    return res.status(200).json({
+      status: 200,
+      data: {
+        token,
+      },
+      message: "success",
+    });
+  } catch (err) {
+    console.error("Login error:", err);
+    return res.status(500).json({
+      status: 500,
+      data: {
+        error_message: "Internal server error while logging in",
+      },
+      message: "error",
+    });
+  }
 });
 
 app.post("/register/user", async (req, res) => {
@@ -57,8 +122,12 @@ app.post("/register/user", async (req, res) => {
 
   if (!firstName || !lastName || !email || !password || !phoneNumber) {
     return res.status(400).json({
-      error:
-        "Missing required fields: firstName, lastName, email, password, phoneNumber",
+      status: 400,
+      data: {
+        error_message:
+          "Missing required fields: firstName, lastName, email, password, phoneNumber",
+      },
+      message: "error",
     });
   }
 
@@ -73,10 +142,20 @@ app.post("/register/user", async (req, res) => {
     const [[response]] = await db.query(`SELECT @response AS message`);
     const parsed = JSON.parse(response.message);
 
-    res.status(parsed.responseCode).json(parsed);
+    const status = parsed.responseCode || 500;
+
+    return res.status(status).json({
+      status: status,
+      data: parsed,
+      message: parsed.responseMessage,
+    });
   } catch (err) {
-    res.status(500).json({
-      error: "Internal server error while registering user",
+    return res.status(500).json({
+      status: 500,
+      data: {
+        error_message: "Internal server error while registering user",
+      },
+      message: "error",
     });
   }
 });
@@ -99,7 +178,13 @@ app.post("/appointments/create", async (req, res) => {
     const [[response]] = await db.query(`SELECT @response AS message`);
     const parsed = JSON.parse(response.message);
 
-    res.status(parsed.responseCode).json(parsed);
+    const status = parsed.responseCode || 500;
+
+    return res.status(status).json({
+      status: status,
+      data: parsed,
+      message: parsed.responseMessage,
+    });
   } catch (err) {
     res.status(500).json({
       error: "Internal server error while creating appointment",
@@ -130,6 +215,31 @@ app.post("/appointments/update", async (req, res) => {
   } catch (err) {
     res.status(500).json({
       error: "Internal server error while updating appointment",
+    });
+  }
+});
+
+app.get("/available-dentists", async (req, res) => {
+  try {
+    const [rows] = await db.execute("SELECT * FROM available_dentists");
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        status: 404,
+        message: "No available dentists found.",
+      });
+    }
+
+    res.status(200).json({
+      status: 200,
+      data: rows,
+      message: "Available dentists fetched successfully.",
+    });
+  } catch (err) {
+    console.error("Error fetching available dentists:", err);
+    res.status(500).json({
+      status: 500,
+      message: "Internal server error while fetching dentists.",
     });
   }
 });
