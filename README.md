@@ -42,6 +42,9 @@ The backend is **Dockerized** and **deployed on AWS EKS (Elastic Kubernetes Serv
 ## 🚀 Deployment URL
 
 🔗 **Backend API URL**:  
+`http://a97b7d07aa44646d8ac1345569b44e33-509261369.us-east-1.elb.amazonaws.com`
+
+🔗 **MySQL Host**:  
 `http://dental-db2.cixqeq0einm3.us-east-1.rds.amazonaws.com`
 
 Example Endpoints:
