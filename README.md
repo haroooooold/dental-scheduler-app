@@ -1,33 +1,64 @@
-# Dental Appointment Backend
+# 🖥️ Dental Scheduler Backend (Node.js + Express)
 
-This is a Node.js backend project for scheduling dental appointments. Built for a technical assessment.
+This is the backend server for the Dental Scheduler Application built for the Junior Full Stack Developer technical assessment.
 
-## 🔗 Live API
+The backend provides RESTful APIs to manage:
 
-http://a97b7d07aa44646d8ac1345569b44e33-509261369.us-east-1.elb.amazonaws.com
+- User registration and authentication (JWT)
+- Booking dental appointments
+- Updating appointment status (cancel, complete)
+- Viewing user-specific appointments
 
-## 🚀 Tech Stack
+The backend is **Dockerized** and **deployed on AWS EKS (Elastic Kubernetes Service)**.
 
-- Node.js + Express
-- MySQL (Amazon RDS)
-- Docker
-- Kubernetes (AWS EKS)
+---
 
-## 📦 API Endpoints
+## 📚 Tech Stack
 
-### `GET /appointments`
+| Area             | Technology            |
+| :--------------- | :-------------------- |
+| Server Framework | Node.js, Express.js   |
+| Database         | MySQL (AWS RDS)       |
+| Deployment       | Docker, AWS EKS       |
+| Authentication   | JWT (JSON Web Tokens) |
 
-Returns all appointments.
+---
 
-### `POST /appointments`
+## ✨ Features
 
-Creates an appointment.
+- User Registration (`/register/user`)
+- User Login (`/login`)
+- Create Appointment (`/appointments/create`)
+- View User Appointments (`/user-appointments`)
+- Update Appointment Status (`/appointments/update`)
+- JWT-protected routes
+- Password hashing with bcrypt
+- Environment-based configuration
+- Email confirmation after booking (optional)
+- CORS-enabled API access
 
-Example JSON body:
+---
 
-```json
-{
-  "name": "Jane Doe",
-  "date": "2025-04-25 14:30:00"
-}
+## 🚀 Deployment URL
+
+🔗 **Backend API URL**:  
+`http://dental-db2.cixqeq0einm3.us-east-1.rds.amazonaws.com`
+
+Example Endpoints:
+
+- `POST /login`
+- `POST /register/user`
+- `GET /user-appointments`
+- `POST /appointments/create`
+- `POST /appointments/update`
+
+---
+
+## ⚙️ Local Development Setup
+
+1. **Clone the repository**:
+
+```bash
+git clone https://github.com/yourusername/dental-scheduler-backend.git
+cd dental-scheduler-backend
 ```
